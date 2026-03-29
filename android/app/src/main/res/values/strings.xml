@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Blossom</string>
+    <string name="title_activity_main">Blossom</string>
+    <string name="package_name">com.blossom.app</string>
+    <string name="custom_url_scheme">com.blossom.app</string>
+</resources>

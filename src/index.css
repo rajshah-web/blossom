@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+
+  --color-rose-primary: #F87171;
+  --color-rose-light: var(--theme-rose-light);
+  --color-rose-dark: #DC2626;
+  --color-teal-primary: #2DD4BF;
+  --color-teal-light: var(--theme-teal-light);
+  --color-purple-primary: #A78BFA;
+  --color-purple-light: var(--theme-purple-light);
+  --color-peach-primary: #FDBA74;
+  --color-peach-light: var(--theme-peach-light);
+  --color-cream: var(--theme-cream);
+  --color-text-dark: var(--theme-text-dark);
+  --color-text-muted: var(--theme-text-muted);
+  --color-border-light: var(--theme-border-light);
+  --color-bg-card: var(--theme-bg-card);
+  --color-bg-chip: var(--theme-bg-chip);
+}
+
+:root {
+  --theme-cream: #FDF6F0;
+  --theme-text-dark: #1C1917;
+  --theme-text-muted: #78716C;
+  --theme-bg-card: #FFFFFF;
+  --theme-border-light: #E7E5E4;
+  --theme-rose-light: #FEE2E2;
+  --theme-teal-light: #D1FAE5;
+  --theme-purple-light: #EDE9FE;
+  --theme-peach-light: #FFF7ED;
+  --theme-bg-chip: #F5F5F4;
+}
+
+.dark {
+  --theme-cream: #121212;
+  --theme-text-dark: #F3F4F6;
+  --theme-text-muted: #9CA3AF;
+  --theme-bg-card: #1E1E1E;
+  --theme-border-light: #374151;
+  --theme-rose-light: #451A1A;
+  --theme-teal-light: #134E4A;
+  --theme-purple-light: #4C1D95;
+  --theme-peach-light: #7C2D12;
+  --theme-bg-chip: #292524;
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-text-dark);
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@keyframes blossom-breathe {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.blossom-bg {
+  background: 
+    radial-gradient(circle at 15% 50%, var(--theme-rose-light) 0%, transparent 50%),
+    radial-gradient(circle at 85% 30%, var(--theme-peach-light) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, var(--theme-purple-light) 0%, transparent 50%),
+    var(--theme-cream);
+  background-size: 200% 200%;
+  animation: blossom-breathe 15s ease-in-out infinite alternate;
+}
+
+.petal {
+  position: fixed;
+  background: var(--theme-rose-primary);
+  border-radius: 15px 0 15px 0;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+  animation: fall linear infinite;
+}
+
+.dark .petal {
+  opacity: 0.15;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(110vh) rotate(360deg) translateX(100px);
+    opacity: 0;
+  }
+}
+
+h1, h2, h3, h4, h5, h6, .font-serif {
+  font-family: var(--font-serif);
+}
