@@ -11,10 +11,15 @@ export const initializeNativePlugins = async () => {
   try {
     // Initialize AdMob
     await AdMob.initialize({
-      requestTrackingAuthorization: true,
       testingDevices: ['2077ef9a63d2b398840261c8221a0c9b'],
       initializeForTesting: true,
     });
+    // Request tracking authorization for iOS
+    try {
+      await AdMob.requestTrackingAuthorization();
+    } catch (e) {
+      console.log('AdMob tracking authorization not supported or failed', e);
+    }
     console.log('AdMob initialized');
   } catch (e) {
     console.error('Failed to initialize AdMob', e);

@@ -13,7 +13,7 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { initializeNativePlugins } from "./lib/native";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
