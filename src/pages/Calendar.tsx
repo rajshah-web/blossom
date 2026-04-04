@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getDay, isWithinInterval, parseISO } from "date-fns";
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getDay } from "date-fns";
 import { ChevronLeft, ChevronRight, Heart, Info, Plus, Check } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
@@ -58,11 +58,11 @@ export default function Calendar() {
   // Helper to check if a date is within any logged period
   const getCycleForDate = (date: Date) => {
     return cycles.find(cycle => {
-      const start = parseISO(cycle.startDate);
+      const start = new Date(cycle.startDate);
       start.setHours(0,0,0,0);
       
       if (cycle.endDate) {
-        const end = parseISO(cycle.endDate);
+        const end = new Date(cycle.endDate);
         end.setHours(23,59,59,999);
         return date >= start && date <= end;
       } else {
@@ -83,9 +83,14 @@ export default function Calendar() {
     if (isPeriodDay(date)) return "period";
     
     // Find the most recent cycle before this date
-    const previousCycle = cycles.find(c => parseISO(c.startDate) < date);
+    const previousCycle = cycles.find(c => {
+      const start = new Date(c.startDate);
+      start.setHours(0,0,0,0);
+      return start < date;
+    });
+
     if (previousCycle) {
-      const cycleStart = parseISO(previousCycle.startDate);
+      const cycleStart = new Date(previousCycle.startDate);
       cycleStart.setHours(0,0,0,0);
       
       const diffTime = Math.abs(date.getTime() - cycleStart.getTime());
@@ -104,17 +109,30 @@ export default function Calendar() {
   
   // Find current active cycle (no end date)
   const activeCycle = cycles.find(c => !c.endDate);
-  const cycleStartingOnSelected = cycles.find(c => isSameDay(parseISO(c.startDate), selectedDate));
+
+  // Use a helper to safely parse timezone for the selected date comparison
+  const isSameDayLocal = (dateString: string, compareDate: Date) => {
+    const d = new Date(dateString);
+    return d.getFullYear() === compareDate.getFullYear() &&
+           d.getMonth() === compareDate.getMonth() &&
+           d.getDate() === compareDate.getDate();
+  };
+
+  const cycleStartingOnSelected = cycles.find(c => isSameDayLocal(c.startDate, selectedDate));
   const completedCycleCoveringSelected = cycles.find(c => {
     if (!c.endDate) return false;
-    const start = parseISO(c.startDate);
-    const end = parseISO(c.endDate);
+    const start = new Date(c.startDate);
+    const end = new Date(c.endDate);
     start.setHours(0,0,0,0);
     end.setHours(23,59,59,999);
     return selectedDate >= start && selectedDate <= end;
   });
 
-  const isSelectedAfterActiveStart = activeCycle && selectedDate > parseISO(activeCycle.startDate);
+  const isSelectedAfterActiveStart = activeCycle && (() => {
+    const activeStart = new Date(activeCycle.startDate);
+    activeStart.setHours(0,0,0,0);
+    return selectedDate >= activeStart;
+  })();
 
   const handleSaveManualLog = async () => {
     if (!user || !manualStart || !manualEnd) {
@@ -122,8 +140,11 @@ export default function Calendar() {
       return;
     }
     
-    const start = new Date(manualStart);
-    const end = new Date(manualEnd);
+    // Fix: input type="date" values (YYYY-MM-DD) parsed by Date constructor
+    // are interpreted as UTC, which can shift the day back depending on local timezone.
+    // Adding T00:00:00 ensures it's interpreted correctly as midnight local time.
+    const start = new Date(`${manualStart}T00:00:00`);
+    const end = new Date(`${manualEnd}T23:59:59`);
     
     if (end < start) {
       alert("End date cannot be before start date.");
@@ -164,9 +185,13 @@ export default function Calendar() {
         });
       } else if (!activeCycle) {
         // Start new cycle
+        // Ensure we capture the start of the selected day
+        const localStartDate = new Date(selectedDate);
+        localStartDate.setHours(0, 0, 0, 0);
+
         await addDoc(collection(db, "users", user.uid, "cycles"), {
           userId: user.uid,
-          startDate: selectedDate.toISOString(),
+          startDate: localStartDate.toISOString(),
           endDate: null
         });
       }
@@ -186,7 +211,7 @@ export default function Calendar() {
           <div>
             <p className="text-sm font-bold text-[var(--color-rose-dark)]">Ongoing Period</p>
             <p className="text-xs text-[var(--color-rose-primary)] mt-1 leading-relaxed">
-              Started on <strong>{format(parseISO(activeCycle.startDate), "MMMM do")}</strong>. 
+              Started on <strong>{format(new Date(activeCycle.startDate), "MMMM do")}</strong>.
               Select the end date on the calendar below and tap "Mark as Period End".
             </p>
           </div>
@@ -295,7 +320,7 @@ export default function Calendar() {
              <div className="space-y-3">
                <div className="flex items-center justify-between text-sm">
                  <span className="text-[var(--color-text-muted)]">Start Date:</span>
-                 <span className="font-medium">{format(parseISO(activeCycle.startDate), "MMM d, yyyy")}</span>
+                 <span className="font-medium">{format(new Date(activeCycle.startDate), "MMM d, yyyy")}</span>
                </div>
                <div className="flex items-center justify-between text-sm">
                  <span className="text-[var(--color-text-muted)]">End Date:</span>
