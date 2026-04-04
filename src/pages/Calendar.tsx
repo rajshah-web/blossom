@@ -94,11 +94,12 @@ export default function Calendar() {
       cycleStart.setHours(0,0,0,0);
       
       const diffTime = Math.abs(date.getTime() - cycleStart.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      // Add 1 to make the start day "Day 1" of the cycle
+      const cycleDay = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
       
       // Simplified estimation: ovulation around day 14, fertile window days 10-15
-      if (diffDays === 14) return "ovulation";
-      if (diffDays >= 10 && diffDays <= 15) return "fertile";
+      if (cycleDay === 14) return "ovulation";
+      if (cycleDay >= 10 && cycleDay <= 15) return "fertile";
     }
     
     return "safe";
@@ -133,6 +134,9 @@ export default function Calendar() {
     activeStart.setHours(0,0,0,0);
     return selectedDate >= activeStart;
   })();
+
+  // A helper to let us know if we should just show the 'add past period' form
+  const showAddPeriodFormOption = !cycleStartingOnSelected && !completedCycleCoveringSelected && !isSelectedAfterActiveStart;
 
   const handleSaveManualLog = async () => {
     if (!user || !manualStart || !manualEnd) {
@@ -316,7 +320,7 @@ export default function Calendar() {
              <button onClick={handleTogglePeriod} className="w-full py-2.5 rounded-xl font-medium bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center gap-2">
                Remove Period Log
              </button>
-          ) : activeCycle ? (
+          ) : activeCycle && !showAddPeriodFormOption ? (
              <div className="space-y-3">
                <div className="flex items-center justify-between text-sm">
                  <span className="text-[var(--color-text-muted)]">Start Date:</span>
@@ -334,7 +338,7 @@ export default function Calendar() {
                  onClick={handleTogglePeriod}
                  disabled={!isSelectedAfterActiveStart}
                  className={cn(
-                   "w-full py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors",
+                   "w-full py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors mb-2",
                    isSelectedAfterActiveStart ? "bg-[var(--color-rose-primary)] text-white hover:bg-opacity-90" : "bg-gray-100 text-gray-400 cursor-not-allowed"
                  )}
                >
@@ -351,7 +355,10 @@ export default function Calendar() {
                  <Plus className="w-4 h-4" />
                  Mark Start Date on {format(selectedDate, "MMM d")}
                </button>
+             </div>
+          )}
                
+          {showAddPeriodFormOption && (
                <div className="pt-2">
                  <button 
                    onClick={() => setShowManualLog(!showManualLog)}
@@ -391,7 +398,6 @@ export default function Calendar() {
                    </div>
                  )}
                </div>
-             </div>
           )}
         </div>
         
