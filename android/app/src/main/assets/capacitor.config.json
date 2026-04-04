@@ -1,6 +1,5 @@
 {
 	"appId": "com.blossom.app",
 	"appName": "Blossom",
-	"webDir": "dist",
-	"bundledWebRuntime": false
+	"webDir": "dist"
 }
